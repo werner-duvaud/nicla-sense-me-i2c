@@ -12,7 +12,7 @@ Features:
 - [x] Absolute orientation (heading to north, pitch, roll).
 - [x] Raw acceleration, gyroscope, magnetometer.
 - [x] Rotation quaternion.
-- [ ] Linear acceleration.
+- [x] Linear acceleration.
 - [x] Temperature.
 - [ ] Pressure.
 - [ ] Gaz.
@@ -37,7 +37,7 @@ sensor = NiclaSenseMe(i2c)
 
 # Calib obtained with sensor.get_calib() after calibration.
 with open('calib.json') as calib_file:
-    calib = json.loads(calib_file.read())
+    calib = json.load(calib_file)
 
 # Warm start with sensor already calibrated.
 sensor.send_calib(**calib)
@@ -46,9 +46,10 @@ sensor.start()
 while True:
     heading, pitch, roll = sensor.orientation()  # In degrees. [0, 360], [-180, 180], [-90, 90]
     acc_x, acc_y, acc_z = sensor.acceleration()  # In earth g.
+    lin_acc_x, lin_acc_y, lin_acc_z = sensor.linear_acceleration()  # In earth g.
     gyr_x, gyr_y, gyr_z = sensor.gyroscope()  # In degrees/second.
     mag_x, mag_y, mag_z = sensor.magnetometer()  # In µT.
-    qx, qy, qz, qw = sensor.quaternion()
+    qx, qy, qz, qw = sensor.quaternion()  # Quaternion.
     temp = sensor.temperature()  # In degrees celsius.
 
     print(f"{heading=:.2f}, {pitch=:.2f}, {roll=:.2f}")

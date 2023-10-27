@@ -9,7 +9,7 @@ sensor = NiclaSenseMe(i2c)
 
 # Calib obtained with sensor.get_calib() after calibration.
 with open("calib.json") as calib_file:
-    calib = json.loads(calib_file.read())
+    calib = json.load(calib_file)
 
 # Warm start with sensor already calibrated.
 sensor.send_calib(**calib)
@@ -23,6 +23,10 @@ while True:
     # In earth g.
     acc_x, acc_y, acc_z = sensor.acceleration()
     print(f"{acc_x=:.2f}g\n{acc_y=:.2f}g\n{acc_z=:.2f}g")
+
+    # In earth g.
+    lin_acc_x, lin_acc_y, lin_acc_z = sensor.linear_acceleration()
+    print(f"{lin_acc_x=:.2f}g\n{lin_acc_y=:.2f}g\n{lin_acc_z=:.2f}g")
 
     # In degrees/second.
     gyr_x, gyr_y, gyr_z = sensor.gyroscope()

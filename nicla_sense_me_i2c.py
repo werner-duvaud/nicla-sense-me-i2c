@@ -10,6 +10,7 @@ CMD_BEGIN = 0x60
 CMD_SEND_CALIB = 0x5B
 CMD_SEND_ORIENTATION = 0x1A
 CMD_SEND_ACCELEROMETER = 0x08
+CMD_SEND_LINEAR_ACCELERATION = 0x28
 CMD_SEND_GYROSCOPE = 0x14
 CMD_SEND_MAGNETOMETER = 0x0E
 CMD_SEND_ROTATION = 0x20
@@ -60,7 +61,7 @@ class NiclaSenseMe:
     def start(self):
         self._writeto(CMD_BEGIN)
         # Wait for the sensor to be ready, otherwise first data are zeros.
-        time.sleep(0.2)
+        time.sleep(0.7)
         return self
 
     def orientation(self):
@@ -80,6 +81,14 @@ class NiclaSenseMe:
         acceleration_range = 8  # In earth g.
         scale = acceleration_range / 32767
         return acc_x * scale, acc_y * scale, acc_z * scale  # In earth g.
+
+    def linear_acceleration(self):
+        lin_acc_x, lin_acc_y, lin_acc_z = self._writeto_then_readfrom(
+            data=CMD_SEND_LINEAR_ACCELERATION, read_format="<hhh"
+        )
+        acceleration_range = 8  # In earth g.
+        scale = acceleration_range / 32767
+        return lin_acc_x * scale, lin_acc_y * scale, lin_acc_z * scale  # In earth g.
 
     def gyroscope(self):
         gyr_x, gyr_y, gyr_z = self._writeto_then_readfrom(
@@ -167,7 +176,7 @@ class NiclaSenseMe:
 
         # Apply the calib.
         self._writeto(data=CMD_APPLY_CALIB)
-        time.sleep(0.05)
+        time.sleep(0.5)
         return self
 
     def check_device(self):

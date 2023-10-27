@@ -8,6 +8,7 @@ Datasheet: https://www.bosch-sensortec.com/media/boschsensortec/downloads/datash
 #include "Wire.h"
 
 SensorXYZ accelerometer(SENSOR_ID_ACC);  // Accelerometer corrected
+SensorXYZ linearAcceleration(SENSOR_ID_LACC);  // Linear acceleration
 SensorXYZ gyroscope(SENSOR_ID_GYRO);  // Gyroscope corrected
 SensorXYZ magnetometer(BHY2_SENSOR_ID_MAG);  // Magnetometer corrected
 SensorOrientation orientation(SENSOR_ID_ORI);  // Orientation
@@ -22,6 +23,7 @@ const uint8_t CMD_BEGIN = 0x60;
 const uint8_t CMD_SEND_CALIB = 0x5B;
 const uint8_t CMD_SEND_ORIENTATION = 0x1A;
 const uint8_t CMD_SEND_ACCELEROMETER = 0x08;
+const uint8_t CMD_SEND_LINEAR_ACCELERATION = 0x28;
 const uint8_t CMD_SEND_GYROSCOPE = 0x14;
 const uint8_t CMD_SEND_MAGNETOMETER = 0x0E;
 const uint8_t CMD_SEND_ROTATION = 0x20;
@@ -57,7 +59,7 @@ void sendCalib() {
   currentCalibPart ++;
 
   // Everything has been sent.
-  if (currentCalibPart == 96) {
+  if (96 <= currentCalibPart) {
     currentCalibPart = 0;
   }
 }
@@ -80,7 +82,7 @@ void receiveCalib() {
   currentCalibPart ++;
   
   // Everything has been received.
-  if (currentCalibPart == 96) {
+  if (96 <= currentCalibPart) {
     currentCalibPart = 0;
     i2c_command = CMD_DEFAULT;
   }
@@ -92,6 +94,14 @@ void sendAccelerometer() {
   accelerationData[1] = accelerometer.y();
   accelerationData[2] = accelerometer.z();
   Wire.write((uint8_t*)accelerationData, sizeof(accelerationData));
+}
+
+void sendLinearAcceleration() {
+  int16_t linearAccelerationData[3];
+  linearAccelerationData[0] = linearAcceleration.x();
+  linearAccelerationData[1] = linearAcceleration.y();
+  linearAccelerationData[2] = linearAcceleration.z();
+  Wire.write((uint8_t*)linearAccelerationData, sizeof(linearAccelerationData));
 }
 
 void sendGyroscope() {
@@ -167,6 +177,8 @@ void requestHandler() {
     sendOrientation();
   } else if (i2c_command == CMD_SEND_ACCELEROMETER) {
     sendAccelerometer();
+  } else if (i2c_command == CMD_SEND_LINEAR_ACCELERATION) {
+    sendLinearAcceleration();
   } else if (i2c_command == CMD_SEND_GYROSCOPE) {
     sendGyroscope();
   } else if (i2c_command == CMD_SEND_MAGNETOMETER) {
@@ -188,6 +200,7 @@ void requestHandler() {
 void begin() {
   // Can't change the calibration manually after calling this function.
   accelerometer.begin();
+  linearAcceleration.begin();
   gyroscope.begin();
   magnetometer.begin();
   orientation.begin();
